@@ -36,7 +36,7 @@ type DonationResponse struct {
 }
 
 type DonationData struct {
-	Id              uint64  `json:"id,omitempty"`
+	Id              uint64  `json:"id"`
 	PaymentMethodId uint64  `json:"payment_method_id"`
 	CampaignId      uint64  `json:"campaign_id"`
 	Amount          float64 `json:"amount"`
@@ -66,7 +66,7 @@ func GetPaymentMethodByID(id uint64) (interface{}, error) {
 func CreateDonationHandler(rw http.ResponseWriter, r *http.Request) {
 	// TODO: implement this
 	rw.Header().Set("Content-Type", "application/json")
-	var resp ResponseBodyResult
+	var resp DonationResponse
 	var msg string
 	var httpStatus int
 	//post donation method
@@ -81,13 +81,13 @@ func CreateDonationHandler(rw http.ResponseWriter, r *http.Request) {
 	paymentMethod, err := GetPaymentMethodByID(newDonation.PaymentMethodId)
 	if err != nil || paymentMethod == nil {
 		resp.Code = "BE-001"
-		httpStatus = http.StatusBadRequest
+		httpStatus = http.StatusInternalServerError
 		msg = fmt.Sprintf("failed to create donation because payment method id %v does not exist", newDonation.PaymentMethodId)
 	}
 	campaign, err := GetCampaignById(newDonation.CampaignId)
 	if err != nil || campaign == nil {
 		resp.Code = "BE-001"
-		httpStatus = http.StatusBadRequest
+		httpStatus = http.StatusInternalServerError
 		msg = fmt.Sprintf("failed to create donation because campaign id %v does not exist", newDonation.CampaignId)
 	}
 	if newDonation.Amount < 10000 {
@@ -105,7 +105,18 @@ func CreateDonationHandler(rw http.ResponseWriter, r *http.Request) {
 			msg = fmt.Sprintf("can't create donation because %s", err.Error())
 		} else {
 			resp.Code = "BE-000"
-			httpStatus = http.StatusCreated
+			var donation Donations
+			err := dbConn.GetDbConnectionPool().SelectOne(&donation, "SELECT * FROM donations WHERE campaign_id = :campaign_id AND payment_method_id = :payment_method_id AND amount = :amount LIMIT 1",
+				map[string]interface{}{
+					"campaign_id":       newDonation.CampaignId,
+					"payment_method_id": newDonation.PaymentMethodId,
+					"amount":            newDonation.Amount,
+				})
+			if err != nil {
+				log.Error().Err(err).Msg("error while fetch donation")
+			}
+			resp.Donation = append(resp.Donation, donation)
+			httpStatus = http.StatusOK
 			msg = "donation created successfully"
 		}
 	}
@@ -148,7 +159,7 @@ func GetDonationByIdHandler(rw http.ResponseWriter, r *http.Request) {
 	} else if donationResult == nil {
 		resp.Code = "BE-002"
 
-		msg = fmt.Sprintf("donation with id %s could not be found", idReq)
+		msg = fmt.Sprintf("donation id %s could not be found", idReq)
 		httpStatus = http.StatusNotFound
 		log.Info().Msgf(msg)
 	} else {
@@ -156,7 +167,7 @@ func GetDonationByIdHandler(rw http.ResponseWriter, r *http.Request) {
 
 		resp.Donation = append(resp.Donation, buildDonationResponse(donationResult))
 
-		msg = fmt.Sprintf("donation id %s successfully retrieved", idReq)
+		msg = fmt.Sprintf("donation id %s is successfully retrieved", idReq)
 		httpStatus = http.StatusOK
 		log.Info().Msgf(msg)
 	}
@@ -168,7 +179,9 @@ func GetDonationByIdHandler(rw http.ResponseWriter, r *http.Request) {
 
 func buildDonationResponse(donationResult interface{}) (resp DonationData) {
 	result := donationResult.(*Donations)
+	fmt.Println("hello")
 	resp.Id = *result.Id
+	fmt.Println("hello2")
 	resp.PaymentMethodId = result.PaymentMethodId
 	resp.CampaignId = result.CampaignId
 	resp.Amount = result.Amount
