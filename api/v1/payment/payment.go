@@ -3,11 +3,12 @@ package payment
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/go-chi/chi"
 	"github.com/kitabisa/backend-takehome-test/internal/config"
 	"github.com/rs/zerolog/log"
-	"net/http"
-	"strconv"
 )
 
 func Routes( /* any dependency injection comes here*/ ) *chi.Mux {
@@ -26,21 +27,36 @@ func CreateNewPaymentMethodHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(http.StatusCreated)
 	var resp ResponseBodyResult
-
+	var msg string
+	//post payment method
+	var newPaymentMethod PaymentMethods
+	err := json.NewDecoder(r.Body).Decode(&newPaymentMethod)
+	if err != nil {
+		resp.Code = "BE-001"
+		msg = "can't decode request"
+	}
+	var dbConn config.DbConnection
+	dbConn.GetDbConnectionPool().AddTableWithName(PaymentMethods{}, "payment_methods").SetKeys(true, "id")
+	err = dbConn.GetDbConnectionPool().Insert(&newPaymentMethod)
+	if err != nil {
+		resp.Code = "BE-001"
+		msg = err.Error()
+	} else {
+		resp.Code = "BE-000"
+		msg = "payment method created"
+	}
 	// this is dummy response, always OK. You need to implement the proper way
-	resp.Code = "BE-000"
-	resp.Message = "payment method created"
+	resp.Message = msg
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		log.Error().Err(err).Msg("Error while marshalling response")
 	}
-
 	rw.Write(jsonResp)
 }
 
 type PaymentMethods struct {
-	Id   uint64 `db:"id"`
-	Name string `db:"name"`
+	Id   uint64 `db:"id" json:"id,omitempty"`
+	Name string `db:"name" json:"name"`
 }
 
 type PaymentMethodResponse struct {
