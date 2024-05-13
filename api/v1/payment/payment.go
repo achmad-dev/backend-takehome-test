@@ -25,24 +25,27 @@ type ResponseBodyResult struct {
 
 func CreateNewPaymentMethodHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusCreated)
 	var resp ResponseBodyResult
 	var msg string
+	var httpStatus int
 	//post payment method
 	var newPaymentMethod PaymentMethods
 	err := json.NewDecoder(r.Body).Decode(&newPaymentMethod)
 	if err != nil {
 		resp.Code = "BE-001"
 		msg = "can't decode request"
+		httpStatus = http.StatusBadRequest
 	}
 	var dbConn config.DbConnection
 	dbConn.GetDbConnectionPool().AddTableWithName(PaymentMethods{}, "payment_methods").SetKeys(true, "id")
 	err = dbConn.GetDbConnectionPool().Insert(&newPaymentMethod)
 	if err != nil {
-		resp.Code = "BE-001"
+		resp.Code = "BE-002"
+		httpStatus = http.StatusInternalServerError
 		msg = fmt.Sprintf("can't create payment method because %s", err.Error())
 	} else {
 		resp.Code = "BE-000"
+		httpStatus = http.StatusCreated
 		msg = "payment method created"
 	}
 	// this is dummy response, always OK. You need to implement the proper way
@@ -51,6 +54,7 @@ func CreateNewPaymentMethodHandler(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error().Err(err).Msg("Error while marshalling response")
 	}
+	rw.WriteHeader(httpStatus)
 	rw.Write(jsonResp)
 }
 
