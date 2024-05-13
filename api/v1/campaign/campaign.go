@@ -119,7 +119,7 @@ func GetCampaignByIdHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 type CampaignData struct {
-	Id    uint64 `json:"id,omitempty"`
+	Id    uint64 `json:"id"`
 	Title string `json:"title"`
 }
 
