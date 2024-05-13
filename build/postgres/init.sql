@@ -20,10 +20,10 @@ create table if not exists backend_test.donations
     amount decimal(9,2)
 );
 
-insert into backend_test.campaigns (id, title) values (1, 'campaign 1');
-insert into backend_test.campaigns (id, title) values (2, 'campaign 2');
+insert into backend_test.campaigns (id, title) values (0, 'campaign 1');
+-- insert into backend_test.campaigns (id, title) values (2, 'campaign 2');
 
-insert into backend_test.payment_methods (id, name) values (1, 'payment method 1');
-insert into backend_test.payment_methods (id, name) values (2, 'payment method 2');
+insert into backend_test.payment_methods (id, name) values (0, 'payment method 1');
+-- insert into backend_test.payment_methods (id, name) values (2, 'payment method 2');
 
-insert into backend_test.donations(id, payment_method_id, campaign_id, amount) values (99999, 1, 1, 10000.00);
+insert into backend_test.donations(id, payment_method_id, campaign_id, amount) values (0, 0, 0, 10000.00);
