@@ -1,0 +1,1027 @@
+{
+	"info": {
+		"_postman_id": "562a9ec4-830f-4d0e-837d-02c0899bc49e",
+		"name": "Backend Homework Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4394302"
+	},
+	"item": [
+		{
+			"name": "Campaign",
+			"item": [
+				{
+					"name": "Get Campaign",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/v1/campaign/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"campaign",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "asda"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/campaign/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"campaign",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Nov 2022 13:12:04 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "106"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-000\",\n    \"message\": \"campaign id 2 successfully retrieved\",\n    \"data\": [\n        {\n            \"id\": 2,\n            \"title\": \"campaign 2\"\n        }\n    ]\n}"
+						},
+						{
+							"name": "Not Found - 404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/campaign/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"campaign",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Nov 2022 15:53:30 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "80"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-002\",\n    \"message\": \"campaign with id 3 could not be found\",\n    \"data\": null\n}"
+						},
+						{
+							"name": "Not Number - 400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/campaign/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"campaign",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "asda"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Nov 2022 15:53:55 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "70"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-001\",\n    \"message\": \"campaign id must be a number\",\n    \"data\": null\n}"
+						},
+						{
+							"name": "Error DB - 500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/campaign/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"campaign",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 26 Nov 2022 03:42:35 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "80"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-001\",\n    \"message\": \"failed to retrieve campaign with id 1\",\n    \"data\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Campaign",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"campaign test backend\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/campaign/create",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"campaign",
+								"create"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"campaign test backend\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/v1/campaign/create",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"campaign",
+										"create"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Nov 2022 13:11:59 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "46"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-000\",\n    \"message\": \"campaign created\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Payment",
+			"item": [
+				{
+					"name": "Get Payment Method",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/v1/payment-method/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"payment-method",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/payment-method/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"payment-method",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Nov 2022 15:54:54 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "117"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-000\",\n    \"message\": \"payment method id 1 successfully retrieved\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"payment method 1\"\n        }\n    ]\n}"
+						},
+						{
+							"name": "Not Found - 404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/payment-method/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"payment-method",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Nov 2022 15:56:23 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "79"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-002\",\n    \"message\": \"payment method with id 3 could not be found\",\n    \"data\": null\n}"
+						},
+						{
+							"name": "Not Number - 400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/payment-method/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"payment-method",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "test"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Nov 2022 15:56:37 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "69"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-001\",\n    \"message\": \"payment method id must be a number\",\n    \"data\": null\n}"
+						},
+						{
+							"name": "Error DB - 500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/payment-method/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"payment-method",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-001\",\n    \"message\": \"failed to retrieve payment method with id 1\",\n    \"data\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Payment Method",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"BCA VA\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/payment-method/create",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"payment-method",
+								"create"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success - 201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"BCA VA\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/v1/payment-method/create",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"payment-method",
+										"create"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 25 Nov 2022 15:57:28 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "52"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-000\",\n    \"message\": \"payment method created\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Donation",
+			"item": [
+				{
+					"name": "Create Donation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payment_method_id\" : 1,\n    \"campaign_id\": 1,\n    \"amount\": 10000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/v1/donation/create",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"donation",
+								"create"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"payment_method_id\" : 1,\n    \"campaign_id\": 1 \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/v1/donation/create",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"donation",
+										"create"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-000\",\n    \"message\": \"donation created successfully\",\n    \"data\": [\n        {\n            \"id\": 123,\n            \"payment_method_id\": 1,\n            \"campaign_id\": 1,\n            \"amount\": 10000\n        }\n    ]\n}"
+						},
+						{
+							"name": "Failed Campaign Not Exist - 500",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"payment_method_id\" : 1,\n    \"campaign_id\": 999 \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/v1/donation/create",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"donation",
+										"create"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-001\",\n    \"message\": \"failed to create donation because campaign id 999 does not exist\",\n    \"data\": null\n}"
+						},
+						{
+							"name": "Failed Payment Method Not Exist - 500",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"payment_method_id\" : 999,\n    \"campaign_id\": 1 \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/v1/donation/create",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"donation",
+										"create"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-001\",\n    \"message\": \"failed to create donation because payment method id 999 does not exist\",\n    \"data\": null\n}"
+						},
+						{
+							"name": "Failed Amount Less than 10000 - 400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"payment_method_id\" : 1,\n    \"campaign_id\": 1 ,\n    \"amount\": 10000\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/v1/donation/create",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"donation",
+										"create"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-001\",\n    \"message\": \"failed to create donation because amount is less than 10000\",\n    \"data\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Donation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/v1/donation/:id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"v1",
+								"donation",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success - 200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/donation/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"donation",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "123"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-000\",\n    \"message\": \"donation id 123 is successfully retrieved\",\n    \"data\": [\n        {\n            \"id\": 123,\n            \"payment_method_id\": 1,\n            \"campaign_id\": 1,\n            \"amount\": 10000\n        }\n    ]\n}"
+						},
+						{
+							"name": "Not Found  - 404",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/donation/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"donation",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-002\",\n    \"message\": \"donation id 1 could not be found\",\n    \"data\": null\n}"
+						},
+						{
+							"name": "Not Number - 400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/v1/donation/:id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"v1",
+										"donation",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "test"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"code\": \"BE-001\",\n    \"message\": \"donation id must be a number\",\n    \"data\": null\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/health_check/db",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"health_check",
+						"db"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success - 200",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/health_check/db",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"health_check",
+								"db"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 25 Nov 2022 13:12:09 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "0"
+						}
+					],
+					"cookie": [],
+					"body": ""
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "localhost:8080",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,1 @@
+go clean -testcache && go test -v -run Test_BackendTestSuite ./integration_test/backend -tags=integration_test

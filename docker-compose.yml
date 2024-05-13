@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:13
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: backend_test
+      POSTGRES_PASSWORD: backend
+    restart: always
+    volumes:
+      - "./build/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql"
+    ports:
+      - "5432:5432"
+    networks:
+      - kb-backend
+
+networks:
+  kb-backend:
+    driver: bridge
+    external: false
+    name: kb-backend

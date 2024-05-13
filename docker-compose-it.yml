@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: backend_test
+      POSTGRES_PASSWORD: backend
+    restart: always
+    volumes:
+      - "./build/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql"
+    ports:
+      - "5433:5432"
+    networks:
+      - kb-backend-test
+
+  backend-takehome-test:
+    container_name: backend-takehome-test
+    build:
+      context: .
+      dockerfile: ./build/docker/Dockerfile
+    command:
+      - /bin/sh
+      - -c
+      - ./main
+    ports:
+      - "8081:8080"
+    networks:
+        - kb-backend-test
+    restart: always
+
+networks:
+  kb-backend-test:
+    driver: bridge
+    external: false
+    name: kb-backend-test
