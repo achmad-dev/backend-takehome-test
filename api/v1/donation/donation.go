@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/kitabisa/backend-takehome-test/internal/config"
@@ -26,7 +27,7 @@ type Donations struct {
 	Id              *uint64 `db:"id" json:"id,omitempty"`
 	PaymentMethodId uint64  `db:"payment_method_id" json:"payment_method_id"`
 	CampaignId      uint64  `db:"campaign_id" json:"campaign_id"`
-	Amount          int64   `db:"amount" json:"amount"`
+	Amount          float64 `db:"amount" json:"amount"`
 }
 
 type DonationResponse struct {
@@ -35,10 +36,10 @@ type DonationResponse struct {
 }
 
 type DonationData struct {
-	Id              uint64 `json:"id,omitempty"`
-	PaymentMethodId uint64 `json:"payment_method_id"`
-	CampaignId      uint64 `json:"campaign_id"`
-	Amount          int64  `json:"amount"`
+	Id              uint64  `json:"id,omitempty"`
+	PaymentMethodId uint64  `json:"payment_method_id"`
+	CampaignId      uint64  `json:"campaign_id"`
+	Amount          float64 `json:"amount"`
 }
 
 type Campaigns struct {
@@ -119,4 +120,57 @@ func CreateDonationHandler(rw http.ResponseWriter, r *http.Request) {
 
 func GetDonationByIdHandler(rw http.ResponseWriter, r *http.Request) {
 	// TODO: implement this
+	var resp DonationResponse
+
+	idReq := chi.URLParam(r, "id")
+	idReqInt, err := strconv.ParseInt(idReq, 0, 64)
+	if err != nil {
+		resp.Code = "BE-001"
+		resp.Message = "donation id must be a number"
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(resp)
+		return
+	}
+
+	var msg string
+	var httpStatus int
+
+	var dbConn config.DbConnection
+	dbConn.GetDbConnectionPool().AddTableWithName(Donations{}, "donations").SetKeys(true, "id")
+	donationResult, err := dbConn.GetDbConnectionPool().Get(Donations{}, idReqInt)
+	if err != nil {
+		resp.Code = "BE-001"
+
+		msg = fmt.Sprintf("failed to retrieve donation with id %s", idReq)
+		httpStatus = http.StatusInternalServerError
+		log.Info().Msgf(msg+" | %s", err.Error())
+	} else if donationResult == nil {
+		resp.Code = "BE-002"
+
+		msg = fmt.Sprintf("donation with id %s could not be found", idReq)
+		httpStatus = http.StatusNotFound
+		log.Info().Msgf(msg)
+	} else {
+		resp.Code = "BE-000"
+
+		resp.Donation = append(resp.Donation, buildDonationResponse(donationResult))
+
+		msg = fmt.Sprintf("donation id %s successfully retrieved", idReq)
+		httpStatus = http.StatusOK
+		log.Info().Msgf(msg)
+	}
+	resp.Message = msg
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(httpStatus)
+	json.NewEncoder(rw).Encode(resp)
+}
+
+func buildDonationResponse(donationResult interface{}) (resp DonationData) {
+	result := donationResult.(*Donations)
+	resp.Id = *result.Id
+	resp.PaymentMethodId = result.PaymentMethodId
+	resp.CampaignId = result.CampaignId
+	resp.Amount = result.Amount
+	return resp
 }
