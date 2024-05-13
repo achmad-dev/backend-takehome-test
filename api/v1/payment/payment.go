@@ -40,7 +40,7 @@ func CreateNewPaymentMethodHandler(rw http.ResponseWriter, r *http.Request) {
 	err = dbConn.GetDbConnectionPool().Insert(&newPaymentMethod)
 	if err != nil {
 		resp.Code = "BE-001"
-		msg = err.Error()
+		msg = fmt.Sprintf("can't create payment method because %s", err.Error())
 	} else {
 		resp.Code = "BE-000"
 		msg = "payment method created"
@@ -55,8 +55,8 @@ func CreateNewPaymentMethodHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 type PaymentMethods struct {
-	Id   uint64 `db:"id" json:"id,omitempty"`
-	Name string `db:"name" json:"name"`
+	Id   *uint64 `db:"id" json:"id,omitempty"`
+	Name string  `db:"name" json:"name"`
 }
 
 type PaymentMethodResponse struct {
@@ -117,7 +117,7 @@ type PaymentMethodData struct {
 
 func buildPaymentResponse(paymentMethodResult interface{}) (resp PaymentMethodData) {
 	result := paymentMethodResult.(*PaymentMethods)
-	resp.Id = result.Id
+	resp.Id = *result.Id
 	resp.Name = result.Name
 	return resp
 }
