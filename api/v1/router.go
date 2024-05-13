@@ -3,14 +3,16 @@ package v1
 import (
 	"context"
 	"fmt"
-	"github.com/kitabisa/backend-takehome-test/api/v1/campaign"
-	"github.com/kitabisa/backend-takehome-test/api/v1/payment"
-	"github.com/kitabisa/backend-takehome-test/api/v1/readiness"
 	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"time"
+
+	"github.com/kitabisa/backend-takehome-test/api/v1/campaign"
+	"github.com/kitabisa/backend-takehome-test/api/v1/donation"
+	"github.com/kitabisa/backend-takehome-test/api/v1/payment"
+	"github.com/kitabisa/backend-takehome-test/api/v1/readiness"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -45,7 +47,8 @@ func Initialize() *chi.Mux {
 
 	router.Route("/v1", func(r chi.Router) {
 		r.Mount("/payment-method", payment.Routes())
-		r.Mount("/campaign", campaign.Routes()) //Implementation of routes from handlers.go
+		r.Mount("/campaign", campaign.Routes())
+		r.Mount("/donation", donation.Routes()) //Implementation of routes from handlers.go
 	})
 
 	router.Mount("/health_check", readiness.Routes())

@@ -14,7 +14,7 @@ create table if not exists backend_test.payment_methods
 
 create table if not exists backend_test.donations
 (
-    id    int not null primary key,
+    id    SERIAL not null primary key,
     payment_method_id int,
     campaign_id int,
     amount decimal(9,2)
