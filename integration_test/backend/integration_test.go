@@ -4,12 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kitabisa/backend-takehome-test/api/v1/campaign"
-	"github.com/kitabisa/backend-takehome-test/api/v1/payment"
-	"github.com/steinfletcher/apitest"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	"github.com/testcontainers/testcontainers-go"
 	"io"
 	"log"
 	"net/http"
@@ -18,6 +12,13 @@ import (
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/kitabisa/backend-takehome-test/api/v1/campaign"
+	"github.com/kitabisa/backend-takehome-test/api/v1/payment"
+	"github.com/steinfletcher/apitest"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"github.com/testcontainers/testcontainers-go"
 )
 
 type BackendTestSuite struct {
@@ -121,12 +122,42 @@ func (suite *BackendTestSuite) TearDownSuite() {
 	return
 }
 
-func (suite *BackendTestSuite) Test_01_1GetCampaignOK() {
+func (suite *BackendTestSuite) Test_02_1CreateCampaignOK() {
 	var client = &http.Client{}
 
+	body := apitest.New("CreateCampaign").
+		EnableNetworking(client).
+		Post("http://localhost:8081/v1/campaign/create").
+		Header("Content-Type", "application/json").
+		Body(`{"title": "campaign 1"}`).
+		Expect(suite.T()).End().Response
+
+	responseBody, _ := io.ReadAll(body.Body)
+	var campaignResponse campaign.CampaignResponse
+
+	json.Unmarshal(responseBody, &campaignResponse)
+
+	if assert.Equal(suite.T(), 201, body.StatusCode) {
+		suite.Score += 1
+	}
+
+	if assert.Equal(suite.T(), "BE-000", campaignResponse.Code) {
+		suite.Score += 1
+	}
+
+	if assert.Equal(suite.T(), "campaign created", campaignResponse.Message) {
+		suite.Score += 1
+	}
+
+	suite.ScoreMap["Test_02_1CreateCampaignOK"] = suite.Score
+	suite.CumulativeMap["Test_02_1CreateCampaignOK"] = 15
+}
+func (suite *BackendTestSuite) Test_01_1GetCampaignOK() {
+	var client = &http.Client{}
+	//insert first
 	body := apitest.New("GetCampaign").
 		EnableNetworking(client).
-		Get("http://localhost:8081/v1/campaign/1").
+		Get("http://localhost:8081/v1/campaign/0").
 		Expect(suite.T()).
 		End().Response
 
@@ -135,31 +166,30 @@ func (suite *BackendTestSuite) Test_01_1GetCampaignOK() {
 
 	json.Unmarshal(responseBody, &campaignResponse)
 	dataResult := make(map[string]interface{})
-	dataResult["id"] = float64(1)
+	dataResult["id"] = float64(0)
 	dataResult["title"] = "campaign 1"
 	var arrayInterface []interface{}
 	arrayInterface = append(arrayInterface, dataResult)
 
 	//scoring
-	if assert.Equal(suite.T(), body.StatusCode, 200) {
+	if assert.Equal(suite.T(), 200, body.StatusCode) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), campaignResponse.Campaign, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, campaignResponse.Campaign) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), campaignResponse.Code, "BE-000") {
+	if assert.Equal(suite.T(), "BE-000", campaignResponse.Code) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), campaignResponse.Message, "campaign id 1 successfully retrieved") {
+	if assert.Equal(suite.T(), "campaign id 0 successfully retrieved", campaignResponse.Message) {
 		suite.Score += 1
 	}
 
 	suite.ScoreMap["Test_01_1GetCampaignOK"] = suite.Score
 	suite.CumulativeMap["Test_01_1GetCampaignOK"] = 4
-
 }
 
 func (suite *BackendTestSuite) Test_01_2GetCampaignFailed_NotFound() {
@@ -177,19 +207,19 @@ func (suite *BackendTestSuite) Test_01_2GetCampaignFailed_NotFound() {
 
 	var arrayInterface []interface{}
 
-	if assert.Equal(suite.T(), body.StatusCode, 404) {
+	if assert.Equal(suite.T(), 404, body.StatusCode) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), campaignResponse.Code, "BE-002") {
+	if assert.Equal(suite.T(), "BE-002", campaignResponse.Code) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), campaignResponse.Message, "campaign with id 3 could not be found") {
+	if assert.Equal(suite.T(), "campaign with id 3 could not be found", campaignResponse.Message) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), campaignResponse.Campaign, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, campaignResponse.Campaign) {
 		suite.Score += 1
 	}
 
@@ -213,19 +243,19 @@ func (suite *BackendTestSuite) Test_01_3GetCampaignFailed_IdNotNumber() {
 
 	var arrayInterface []interface{}
 
-	if assert.Equal(suite.T(), body.StatusCode, 400) {
+	if assert.Equal(suite.T(), 400, body.StatusCode) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), campaignResponse.Code, "BE-001") {
+	if assert.Equal(suite.T(), "BE-001", campaignResponse.Code) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), campaignResponse.Message, "campaign id must be a number") {
+	if assert.Equal(suite.T(), "campaign id must be a number", campaignResponse.Message) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), campaignResponse.Campaign, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, campaignResponse.Campaign) {
 		suite.Score += 1
 	}
 
@@ -234,41 +264,14 @@ func (suite *BackendTestSuite) Test_01_3GetCampaignFailed_IdNotNumber() {
 
 }
 
-func (suite *BackendTestSuite) Test_02_1CreateCampaignOK() {
-	var client = &http.Client{}
-
-	body := apitest.New("CreateCampaign").
-		EnableNetworking(client).
-		Post("http://localhost:8081/v1/campaign/create").
-		Expect(suite.T()).End().Response
-
-	responseBody, _ := io.ReadAll(body.Body)
-	var campaignResponse campaign.CampaignResponse
-
-	json.Unmarshal(responseBody, &campaignResponse)
-
-	if assert.Equal(suite.T(), body.StatusCode, 201) {
-		suite.Score += 1
-	}
-
-	if assert.Equal(suite.T(), campaignResponse.Code, "BE-000") {
-		suite.Score += 1
-	}
-
-	if assert.Equal(suite.T(), campaignResponse.Message, "campaign created") {
-		suite.Score += 1
-	}
-
-	suite.ScoreMap["Test_02_1CreateCampaignOK"] = suite.Score
-	suite.CumulativeMap["Test_02_1CreateCampaignOK"] = 15
-}
-
 func (suite *BackendTestSuite) Test_03_1CreatePaymentMethodOK() {
 	var client = &http.Client{}
 
 	body := apitest.New("CreatePaymentMethod").
 		EnableNetworking(client).
 		Post("http://localhost:8081/v1/payment-method/create").
+		Header("Content-Type", "application/json").
+		Body(`{"name": "payment method 1"}`).
 		Expect(suite.T()).End().Response
 
 	responseBody, _ := io.ReadAll(body.Body)
@@ -276,15 +279,15 @@ func (suite *BackendTestSuite) Test_03_1CreatePaymentMethodOK() {
 
 	json.Unmarshal(responseBody, &paymentMethodResponse)
 
-	if assert.Equal(suite.T(), body.StatusCode, 201) {
+	if assert.Equal(suite.T(), 201, body.StatusCode) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.Code, "BE-000") {
+	if assert.Equal(suite.T(), "BE-000", paymentMethodResponse.Code) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.Message, "payment method created") {
+	if assert.Equal(suite.T(), "payment method created", paymentMethodResponse.Message) {
 		suite.Score += 1
 	}
 
@@ -297,7 +300,7 @@ func (suite *BackendTestSuite) Test_04_1GetPaymentMethodOK() {
 
 	body := apitest.New("GetPaymentMethod").
 		EnableNetworking(client).
-		Get("http://localhost:8081/v1/payment-method/1").
+		Get("http://localhost:8081/v1/payment-method/0").
 		Expect(suite.T()).End().Response
 
 	responseBody, _ := io.ReadAll(body.Body)
@@ -306,7 +309,7 @@ func (suite *BackendTestSuite) Test_04_1GetPaymentMethodOK() {
 	json.Unmarshal(responseBody, &paymentMethodResponse)
 
 	dataResult := make(map[string]interface{})
-	dataResult["id"] = float64(1)
+	dataResult["id"] = float64(0)
 	dataResult["name"] = "payment method 1"
 	var arrayInterface []interface{}
 	arrayInterface = append(arrayInterface, dataResult)
@@ -314,15 +317,15 @@ func (suite *BackendTestSuite) Test_04_1GetPaymentMethodOK() {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.Code, "BE-000") {
+	if assert.Equal(suite.T(), "BE-000", paymentMethodResponse.Code) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.Message, "payment method id 1 successfully retrieved") {
+	if assert.Equal(suite.T(), "payment method id 0 successfully retrieved", paymentMethodResponse.Message) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.PaymentMethod, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, paymentMethodResponse.PaymentMethod) {
 		suite.Score += 1
 	}
 
@@ -345,19 +348,19 @@ func (suite *BackendTestSuite) Test_04_2GetPaymentMethod_NotFound() {
 
 	var arrayInterface []interface{}
 
-	if assert.Equal(suite.T(), body.StatusCode, 404) {
+	if assert.Equal(suite.T(), 404, body.StatusCode) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.Code, "BE-002") {
+	if assert.Equal(suite.T(), "BE-002", paymentMethodResponse.Code) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.Message, "payment method with id 3 could not be found") {
+	if assert.Equal(suite.T(), "payment method with id 3 could not be found", paymentMethodResponse.Message) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.PaymentMethod, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, paymentMethodResponse.PaymentMethod) {
 		suite.Score += 1
 	}
 
@@ -380,19 +383,19 @@ func (suite *BackendTestSuite) Test_04_3GetPaymentMethod_IdNotNumber() {
 	json.Unmarshal(responseBody, &paymentMethodResponse)
 	var arrayInterface []interface{}
 
-	if assert.Equal(suite.T(), body.StatusCode, 400) {
+	if assert.Equal(suite.T(), 400, body.StatusCode) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.Code, "BE-001") {
+	if assert.Equal(suite.T(), "BE-001", paymentMethodResponse.Code) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.Message, "payment method id must be a number") {
+	if assert.Equal(suite.T(), "payment method id must be a number", paymentMethodResponse.Message) {
 		suite.Score += 1
 	}
 
-	if assert.Equal(suite.T(), paymentMethodResponse.PaymentMethod, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, paymentMethodResponse.PaymentMethod) {
 		suite.Score += 1
 	}
 
@@ -417,7 +420,7 @@ func (suite *BackendTestSuite) Test_05_1GetDonationOK() {
 
 	body := apitest.New("GetDonation").
 		EnableNetworking(client).
-		Get("http://localhost:8081/v1/donation/1").
+		Get("http://localhost:8081/v1/donation/0").
 		Header("Content-Type", "application/json").
 		Expect(suite.T()).End().Response
 
@@ -428,26 +431,26 @@ func (suite *BackendTestSuite) Test_05_1GetDonationOK() {
 	json.Unmarshal(responseBody, &donationResponse)
 
 	dataResult := make(map[string]interface{})
-	dataResult["id"] = float64(99999)
-	dataResult["payment_method_id"] = float64(1)
-	dataResult["campaign_id"] = float64(1)
+	dataResult["id"] = float64(0)
+	dataResult["payment_method_id"] = float64(0)
+	dataResult["campaign_id"] = float64(0)
 	dataResult["amount"] = float64(10000)
 	var arrayInterface []interface{}
 	arrayInterface = append(arrayInterface, dataResult)
 
-	if assert.Equal(suite.T(), body.StatusCode, 200) {
+	if assert.Equal(suite.T(), 200, body.StatusCode) {
 		suite.Score += 3
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Code, "BE-000") {
+	if assert.Equal(suite.T(), "BE-000", donationResponse.Code) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Message, "donation id 1 is successfully retrieved") {
+	if assert.Equal(suite.T(), "donation id 0 is successfully retrieved", donationResponse.Message) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Donation, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, donationResponse.Donation) {
 		suite.Score += 3
 	}
 
@@ -470,19 +473,19 @@ func (suite *BackendTestSuite) Test_05_2GetDonation_NotFound() {
 
 	json.Unmarshal(responseBody, &donationResponse)
 	var arrayInterface []interface{}
-	if assert.Equal(suite.T(), body.StatusCode, 404) {
+	if assert.Equal(suite.T(), 404, body.StatusCode) {
 		suite.Score += 3
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Code, "BE-002") {
+	if assert.Equal(suite.T(), "BE-002", donationResponse.Code) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Message, "donation id 3 could not be found") {
+	if assert.Equal(suite.T(), "donation id 3 could not be found", donationResponse.Message) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Donation, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, donationResponse.Donation) {
 		suite.Score += 3
 	}
 
@@ -505,19 +508,19 @@ func (suite *BackendTestSuite) Test_05_3GetDonation_IdNotNumber() {
 
 	json.Unmarshal(responseBody, &donationResponse)
 	var arrayInterface []interface{}
-	if assert.Equal(suite.T(), body.StatusCode, 400) {
+	if assert.Equal(suite.T(), 400, body.StatusCode) {
 		suite.Score += 3
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Code, "BE-001") {
+	if assert.Equal(suite.T(), "BE-001", donationResponse.Code) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Message, "donation id must be a number") {
+	if assert.Equal(suite.T(), "donation id must be a number", donationResponse.Message) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Donation, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, donationResponse.Donation) {
 		suite.Score += 3
 	}
 
@@ -552,21 +555,20 @@ func (suite *BackendTestSuite) Test_06_1CreateDonationOK() {
 		suite.Score += 3
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Code, "BE-000") {
+	if assert.Equal(suite.T(), "BE-000", donationResponse.Code) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Message, "donation created successfully") {
+	if assert.Equal(suite.T(), "donation created successfully", donationResponse.Message) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Donation, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, donationResponse.Donation) {
 		suite.Score += 3
 	}
 
 	suite.ScoreMap["Test_06_1CreateDonationOK"] = suite.Score
 	suite.CumulativeMap["Test_06_1CreateDonationOK"] = 70
-
 }
 
 func (suite *BackendTestSuite) Test_06_2CreateDonationCampaignNotFound() {
@@ -589,15 +591,15 @@ func (suite *BackendTestSuite) Test_06_2CreateDonationCampaignNotFound() {
 		suite.Score += 3
 	}
 
-	if assert.Equal(suite.T(), body.StatusCode, 500) {
+	if assert.Equal(suite.T(), 500, body.StatusCode) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Code, "BE-001") {
+	if assert.Equal(suite.T(), "BE-001", donationResponse.Code) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Message, "failed to create donation because campaign id 999 does not exist") {
+	if assert.Equal(suite.T(), "failed to create donation because campaign id 999 does not exist", donationResponse.Message) {
 		suite.Score += 3
 	}
 
@@ -622,19 +624,19 @@ func (suite *BackendTestSuite) Test_06_3CreateDonationPaymentMethodNotFound() {
 
 	var arrayInterface []interface{}
 
-	if assert.Equal(suite.T(), body.StatusCode, 500) {
+	if assert.Equal(suite.T(), 500, body.StatusCode) {
 		suite.Score += 3
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Code, "BE-001") {
+	if assert.Equal(suite.T(), "BE-001", donationResponse.Code) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Message, "failed to create donation because payment method id 999 does not exist") {
+	if assert.Equal(suite.T(), "failed to create donation because payment method id 999 does not exist", donationResponse.Message) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Donation, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, donationResponse.Donation) {
 		suite.Score += 3
 	}
 
@@ -659,19 +661,19 @@ func (suite *BackendTestSuite) Test_06_4CreateDonationAmountLessThan10000() {
 
 	var arrayInterface []interface{}
 
-	if assert.Equal(suite.T(), body.StatusCode, 400) {
+	if assert.Equal(suite.T(), 400, body.StatusCode) {
 		suite.Score += 3
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Code, "BE-001") {
+	if assert.Equal(suite.T(), "BE-001", donationResponse.Code) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Message, "failed to create donation because amount is less than 10000") {
+	if assert.Equal(suite.T(), "failed to create donation because amount is less than 10000", donationResponse.Message) {
 		suite.Score += 2
 	}
 
-	if assert.Equal(suite.T(), donationResponse.Donation, arrayInterface) {
+	if assert.Equal(suite.T(), arrayInterface, donationResponse.Donation) {
 		suite.Score += 3
 	}
 
