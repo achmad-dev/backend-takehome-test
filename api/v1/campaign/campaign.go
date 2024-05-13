@@ -26,16 +26,17 @@ type ResponseBodyResult struct {
 func CreateNewCampaignHandler(rw http.ResponseWriter, r *http.Request) {
 
 	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusCreated)
 
 	//create campaign
 	var resp ResponseBodyResult
 	var msg string
+	var httpStatus int
 	//post payment method
 	var newCampaign Campaigns
 	err := json.NewDecoder(r.Body).Decode(&newCampaign)
 	if err != nil {
 		resp.Code = "BE-001"
+		httpStatus = http.StatusBadRequest
 		msg = "can't decode request"
 	}
 	var dbConn config.DbConnection
@@ -43,18 +44,19 @@ func CreateNewCampaignHandler(rw http.ResponseWriter, r *http.Request) {
 	err = dbConn.GetDbConnectionPool().Insert(&newCampaign)
 	if err != nil {
 		resp.Code = "BE-002"
+		httpStatus = http.StatusInternalServerError
 		msg = fmt.Sprintf("can't create campaign because %s", err.Error())
 	} else {
 		resp.Code = "BE-000"
+		httpStatus = http.StatusCreated
 		msg = "campaign created"
 	}
-	// this is dummy response, always OK. You need to implement the proper way
 	resp.Message = msg
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		log.Error().Err(err).Msg("Error while marshalling response")
 	}
-
+	rw.WriteHeader(httpStatus)
 	rw.Write(jsonResp)
 }
 
