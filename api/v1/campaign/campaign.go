@@ -3,11 +3,12 @@ package campaign
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/go-chi/chi"
 	"github.com/kitabisa/backend-takehome-test/internal/config"
 	"github.com/rs/zerolog/log"
-	"net/http"
-	"strconv"
 )
 
 func Routes( /* any dependency injection comes here*/ ) *chi.Mux {
@@ -27,10 +28,28 @@ func CreateNewCampaignHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(http.StatusCreated)
 
-	// this is dummy response, always OK. You need to implement the proper way
+	//create campaign
 	var resp ResponseBodyResult
-	resp.Code = "BE-000"
-	resp.Message = "campaign created"
+	var msg string
+	//post payment method
+	var newCampaign Campaigns
+	err := json.NewDecoder(r.Body).Decode(&newCampaign)
+	if err != nil {
+		resp.Code = "BE-001"
+		msg = "can't decode request"
+	}
+	var dbConn config.DbConnection
+	dbConn.GetDbConnectionPool().AddTableWithName(Campaigns{}, "campaigns").SetKeys(true, "id")
+	err = dbConn.GetDbConnectionPool().Insert(&newCampaign)
+	if err != nil {
+		resp.Code = "BE-002"
+		msg = fmt.Sprintf("can't create campaign because %s", err.Error())
+	} else {
+		resp.Code = "BE-000"
+		msg = "campaign created"
+	}
+	// this is dummy response, always OK. You need to implement the proper way
+	resp.Message = msg
 	jsonResp, err := json.Marshal(resp)
 	if err != nil {
 		log.Error().Err(err).Msg("Error while marshalling response")
@@ -40,8 +59,8 @@ func CreateNewCampaignHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 type Campaigns struct {
-	Id    uint64 `db:"id"`
-	Title string `db:"title"`
+	Id    *uint64 `db:"id" json:"id,omitempty"`
+	Title string  `db:"title" json:"title"`
 }
 
 type CampaignResponse struct {
@@ -98,13 +117,13 @@ func GetCampaignByIdHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 type CampaignData struct {
-	Id    uint64 `json:"id"`
+	Id    uint64 `json:"id,omitempty"`
 	Title string `json:"title"`
 }
 
 func buildCampaignResponse(campaignResult interface{}) (resp CampaignData) {
 	result := campaignResult.(*Campaigns)
-	resp.Id = result.Id
+	resp.Id = *result.Id
 	resp.Title = result.Title
 	return resp
 }
